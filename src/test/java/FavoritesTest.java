@@ -15,7 +15,10 @@ public class FavoritesTest {
     void addToFavoritesTest() {
         String address = "https://www.avito.ru/nikel/knigi_i_zhurnaly/domain"
                 + "-driven_design_distilled_vaughn_vernon_2639542363";
-        long itemId = 2639542363L;
+        final Pattern ITEM_ID_PATTERN = Pattern.compile("\\d+$");
+        Matcher matcher = ITEM_ID_PATTERN.matcher(address);
+        matcher.find();
+        long itemId = Long.parseLong(matcher.group(0));
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.chromium().launch();
             BrowserContext context = browser.newContext();
