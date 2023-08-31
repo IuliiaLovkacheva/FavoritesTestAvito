@@ -13,10 +13,10 @@ public class FavoritesTest {
 
     @Test
     void addToFavoritesTest() {
-        String address = "https://www.avito.ru/nikel/knigi_i_zhurnaly/domain"
+        String url = "https://www.avito.ru/nikel/knigi_i_zhurnaly/domain"
                 + "-driven_design_distilled_vaughn_vernon_2639542363";
         final Pattern ITEM_ID_PATTERN = Pattern.compile("\\d+$");
-        Matcher matcher = ITEM_ID_PATTERN.matcher(address);
+        Matcher matcher = ITEM_ID_PATTERN.matcher(url);
         matcher.find();
         long itemId = Long.parseLong(matcher.group(0));
         try (Playwright playwright = Playwright.create()) {
@@ -24,7 +24,7 @@ public class FavoritesTest {
             BrowserContext context = browser.newContext();
 
             Page page = context.newPage();
-            page.navigate(address);
+            page.navigate(url);
 
             Locator addToFavorites = page.locator("//div[@class='style-header-add-favorite-M7nA2']//button[1]");
             assertThat(addToFavorites).hasAttribute("data-is-favorite", "false");
@@ -37,11 +37,13 @@ public class FavoritesTest {
             Locator itemTimeLocator =
                     page.locator("//span[@data-marker='item-view/item-id']/following-sibling::span[1]");
             String itemTime = convertTimeToFavoritesFormat(itemTimeLocator.textContent());
+            String itemAddress = page.locator("(//div[@class='style-item-address-KooqC']//span)[1]").textContent();
 
             Locator favoritesLink = page.locator("//a[@data-marker='header/favorites']");
             favoritesLink.click();
 
-            assertThat(page).hasURL("https://www.avito.ru/favorites");
+            final String FAVORITES_URL = "https://www.avito.ru/favorites";
+            assertThat(page).hasURL(FAVORITES_URL);
             Locator favoriteItems = page.locator("//div[@class='favorite-items-list-favoritesWidgets-JE_Bq"
                     + "']/following-sibling::div[1]");
 
@@ -58,6 +60,8 @@ public class FavoritesTest {
             assertThat(price).hasText(itemPrice);
             Locator time = item.locator("//div[@class='location-root-DKKDg']/following-sibling::p");
             assertThat(time).hasText(itemTime);
+            Locator address = item.locator("//span[@class='location-addressLine-igcGe']");
+            assertThat(address).hasText(itemAddress);
         }
     }
 
